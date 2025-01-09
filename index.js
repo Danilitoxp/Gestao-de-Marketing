@@ -1,3 +1,99 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDdRfbb1z3uAmkQRwK0xLO0i7ouR-yaxEA",
+  authDomain: "marketing-464cc.firebaseapp.com",
+  projectId: "marketing-464cc",
+  storageBucket: "marketing-464cc.firebasestorage.app",
+  messagingSenderId: "644925828873",
+  appId: "1:644925828873:web:c136cad9daf6f66f942dd8"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Funções Firebase
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadEventsFromFirestore(); // Carrega os eventos antes de gerar o calendário
+  initializeCalendar();
+
+  document.getElementById("esquerta").addEventListener("click", () => changeMonth(-1));
+  document.getElementById("direita").addEventListener("click", () => changeMonth(1));
+});
+
+async function addEventToFirestore(date, title, description, type) {
+  try {
+    // Referência à coleção "events"
+    const docRef = await addDoc(collection(db, "events"), {
+      date,
+      title,
+      description,
+      type,
+    });
+
+    console.log("Evento adicionado ao Firestore com ID:", docRef.id);
+  } catch (error) {
+    console.error("Erro ao adicionar evento ao Firestore:", error);
+  }
+}
+
+
+async function deleteEventFromFirestore(eventId) {
+  try {
+    await deleteDoc(doc(db, "events", eventId));
+    console.log("Evento excluído com sucesso:", eventId);
+  } catch (error) {
+    console.error("Erro ao excluir evento do Firestore:", error);
+  }
+}
+
+function deleteEvent(date, index) {
+  const eventId = events[date][index].id; // Obtenha o ID do evento
+  deleteEventFromFirestore(eventId); // Exclua do Firestore
+
+  // Remova localmente
+  events[date].splice(index, 1);
+
+  if (events[date].length === 0) {
+    delete events[date];
+  }
+
+  const [year, month] = date.split("-").map(Number);
+  generateCalendar(month - 1, year);
+
+  const [day] = date.split("-").slice(-1);
+  openAddEventModal(Number(day), month - 1, year);
+}
+
+async function loadEventsFromFirestore() {
+  try {
+    const querySnapshot = await getDocs(collection(db, "events"));
+    querySnapshot.forEach((doc) => {
+      const eventData = doc.data();
+      const { date, title, description, type } = eventData;
+
+      if (!events[date]) events[date] = [];
+      const { icon, color } = eventTypes[type] || {};
+      events[date].push({
+        id: doc.id,
+        title,
+        description,
+        type,
+        icon: icon || "event",
+        color: color || "#000000",
+      });
+    });
+
+    generateCalendar(currentMonth, currentYear);
+  } catch (error) {
+    console.error("Erro ao carregar eventos do Firestore:", error);
+  }
+}
+
+
 // Objeto para armazenar os eventos
 const events = {};
 
@@ -89,23 +185,23 @@ function generateCalendar(month, year) {
         const eventList = document.createElement("ul");
         eventList.classList.add("event-list");
 
+        // Verificar se há eventos na data atual
         if (events[currentDate]) {
           events[currentDate].forEach((event) => {
             const listItem = document.createElement("li");
             listItem.style.backgroundColor = event.color;
-        
+
             // Adicionar ícone e título ao item
             const icon = document.createElement("span");
             icon.className = "material-icons";
             icon.textContent = event.icon;
             icon.style.marginRight = "5px";
-        
+
             listItem.appendChild(icon);
             listItem.appendChild(document.createTextNode(event.title));
             eventList.appendChild(listItem);
           });
         }
-        
 
         cell.appendChild(eventList);
 
@@ -126,6 +222,7 @@ function generateCalendar(month, year) {
 
   calendarTable.appendChild(tbody);
 }
+
 
 function changeMonth(direction) {
   currentMonth += direction;
@@ -206,29 +303,6 @@ function editEvent(date, index) {
   deleteEvent(date, index);
 }
 
-function deleteEvent(date, index) {
-  events[date].splice(index, 1);
-
-  // Se não houver mais eventos, remova a chave da data
-  if (events[date].length === 0) {
-    delete events[date];
-  }
-
-  // Atualiza o calendário e o modal
-  const [year, month] = date.split("-").map(Number);
-  generateCalendar(month - 1, year);
-
-  // Reabre o modal para refletir as alterações
-  const [day] = date.split("-").slice(-1);
-  openAddEventModal(Number(day), month - 1, year);
-}
-
-function getRandomEventColor() {
-  // Gera um valor hexadecimal aleatório entre #000000 e #FFFFFF
-  const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')}`;
-  return randomColor;
-}
-
 
 // Fecha o modal
 document.getElementById("close-event-modal").addEventListener("click", () => {
@@ -236,7 +310,7 @@ document.getElementById("close-event-modal").addEventListener("click", () => {
 });
 
 // Adiciona evento ao dia selecionado
-document.getElementById("add-event-form").addEventListener("submit", (e) => {
+document.getElementById("add-event-form").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const modal = document.getElementById("add-event-modal");
@@ -245,20 +319,24 @@ document.getElementById("add-event-form").addEventListener("submit", (e) => {
   const description = document.getElementById("event-description").value;
   const type = document.getElementById("event-type").value;
 
-  // Obtém os detalhes do tipo de evento
+  // Salvar evento localmente
   const { icon, color } = eventTypes[type];
-
   if (!events[date]) events[date] = [];
   events[date].push({ title, description, type, icon, color });
 
-  console.log("Data do evento:", date);
-  console.log("Evento adicionado:", { title, description, type, icon, color });
+  // Salvar evento no Firestore
+  await addEventToFirestore(date, title, description, type);
 
+
+  // Fechar modal e resetar formulário
   modal.classList.remove("show");
   e.target.reset();
 
+  // Atualizar calendário
   const [year, month] = date.split("-").map(Number);
   generateCalendar(month - 1, year);
 });
+
+
 
 

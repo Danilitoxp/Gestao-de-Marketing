@@ -271,7 +271,7 @@ aside .sidebar a:active {
 main .Calendario {
   flex: 1; /* Permite que ocupe todo o espaço disponível */
   width: 100%; /* Garante que a largura seja 100% do parent */
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 
 
@@ -282,7 +282,7 @@ main .Calendario h2 {
 main .Calendario table {
   background: var(--color-white);
   width: 100%;
-  height: 83vh;
+  height: 85vh;
   max-height: 90vh;
   border-radius: var(--card-border-radius);
   padding: var(--card-padding);
@@ -1128,15 +1128,15 @@ button:hover {
   align-items: center; /* Alinha os eventos verticalmente no centro */
   gap: 5px; /* Espaçamento entre os eventos */
   width: 100%; /* Garante que os eventos ocupem toda a largura da célula */
-  height: 40%;
+  height: auto;
   overflow: hidden; /* Remove qualquer conteúdo que ultrapasse os limites */
 }
 
 .event-list li {
   /* background-color: var(--color-primary); */ /* Remova ou comente esta linha */
-  padding: 5px 10px;
+  padding: 0px 10px;
   border-radius: 3px;
-  font-size: 1rem;
+  font-size: 0.8rem;
   width: 90%;
   text-align: center;
   color: var(--color-background);
