@@ -31,6 +31,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="shortcut icon" href="/images/Carflax Logomarca vertical.svg" type="image/x-icon" />
   </head>
 
   <body>
@@ -111,11 +112,19 @@
 
               <form id="add-event-form">
                 <label for="event-title">Título do Evento:</label>
-                <input type="text" id="event-title" placeholder="Título do evento" required />
-                
+                <input
+                  type="text"
+                  id="event-title"
+                  placeholder="Título do evento"
+                  required
+                />
+
                 <label for="event-description">Descrição:</label>
-                <textarea id="event-description" placeholder="Descrição do evento"></textarea>
-                
+                <textarea
+                  id="event-description"
+                  placeholder="Descrição do evento"
+                ></textarea>
+
                 <label for="event-type">Tipo de Evento:</label>
                 <select id="event-type" required>
                   <option value="meeting">Reunião</option>
@@ -125,10 +134,11 @@
                   <option value="birthday">Aniversário</option>
                   <option value="special_day">Dia Especial</option>
                 </select>
-                
-                <button type="submit" class="primary action-btn">Salvar Evento</button>
+
+                <button type="submit" class="primary action-btn">
+                  Salvar Evento
+                </button>
               </form>
-              
             </div>
           </div>
         </section>
