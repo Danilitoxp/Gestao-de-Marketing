@@ -16,14 +16,6 @@ const db = getFirestore(app);
 
 // Funções Firebase
 
-document.addEventListener("DOMContentLoaded", async () => {
-  await loadEventsFromFirestore(); // Carrega os eventos antes de gerar o calendário
-  initializeCalendar();
-
-  document.getElementById("esquerta").addEventListener("click", () => changeMonth(-1));
-  document.getElementById("direita").addEventListener("click", () => changeMonth(1));
-});
-
 async function addEventToFirestore(date, title, description, type) {
   try {
     // Referência à coleção "events"
@@ -112,13 +104,48 @@ let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
 
 // Inicialização do DOM
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadEventsFromFirestore(); // Carrega os eventos antes de gerar o calendário
   initializeCalendar();
 
-  // Adiciona event listeners para os botões de navegação
-  document.getElementById("esquerta").addEventListener("click", () => changeMonth(-1));
-  document.getElementById("direita").addEventListener("click", () => changeMonth(1));
+  // Adiciona event listeners de forma segura
+  const leftButton = document.getElementById("esquerta");
+  const rightButton = document.getElementById("direita");
+
+  leftButton.removeEventListener("click", () => changeMonth(-1));
+  rightButton.removeEventListener("click", () => changeMonth(1));
+
+  leftButton.addEventListener("click", () => changeMonth(-1));
+  rightButton.addEventListener("click", () => changeMonth(1));
 });
+
+function changeMonth(direction) {
+  // Ajusta o mês atual
+  currentMonth += direction;
+
+  // Corrige valores fora do intervalo 0-11
+  if (currentMonth < 0) {
+    currentMonth = 11; // Dezembro
+    currentYear -= 1;  // Reduz o ano
+  } else if (currentMonth > 11) {
+    currentMonth = 0;  // Janeiro
+    currentYear += 1;  // Incrementa o ano
+  }
+
+  console.log(`Mês atual: ${currentMonth}, Ano atual: ${currentYear}`);
+
+  // Atualiza o texto do campo de data
+  const dateInput = document.getElementById("dashboard-date-range-1");
+  const monthNames = [
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+  ];
+  dateInput.value = `${monthNames[currentMonth]} ${currentYear}`;
+
+  // Regera o calendário
+  generateCalendar(currentMonth, currentYear);
+}
+
 
 function initializeCalendar() {
   const dateInput = document.getElementById("dashboard-date-range-1");
@@ -222,30 +249,6 @@ function generateCalendar(month, year) {
 
   calendarTable.appendChild(tbody);
 }
-
-
-function changeMonth(direction) {
-  currentMonth += direction;
-
-  if (currentMonth < 0) {
-    currentMonth = 11;
-    currentYear -= 1;
-  } else if (currentMonth > 11) {
-    currentMonth = 0;
-    currentYear += 1;
-  }
-
-  // Atualiza o texto do campo de data
-  const dateInput = document.getElementById("dashboard-date-range-1");
-  const monthNames = [
-    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-  ];
-  dateInput.value = `${monthNames[currentMonth]} ${currentYear}`;
-
-  generateCalendar(currentMonth, currentYear);
-}
-
 
 function openAddEventModal(day, month, year) {
   const modal = document.getElementById("add-event-modal");
