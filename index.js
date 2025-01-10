@@ -62,6 +62,9 @@ function deleteEvent(date, index) {
 
 async function loadEventsFromFirestore() {
   try {
+    // Limpar os eventos previamente carregados
+    Object.keys(events).forEach(key => delete events[key]);
+
     const querySnapshot = await getDocs(collection(db, "events"));
     querySnapshot.forEach((doc) => {
       const eventData = doc.data();
@@ -79,11 +82,13 @@ async function loadEventsFromFirestore() {
       });
     });
 
+    console.log("Eventos carregados do Firestore:", events);
     generateCalendar(currentMonth, currentYear);
   } catch (error) {
     console.error("Erro ao carregar eventos do Firestore:", error);
   }
 }
+
 
 
 // Objeto para armazenar os eventos
@@ -142,10 +147,11 @@ function changeMonth(direction) {
   ];
   dateInput.value = `${monthNames[currentMonth]} ${currentYear}`;
 
-  // Regera o calendário
-  generateCalendar(currentMonth, currentYear);
+  // Recarrega os eventos e rege o calendário
+  loadEventsFromFirestore().then(() => {
+    generateCalendar(currentMonth, currentYear);
+  });
 }
-
 
 function initializeCalendar() {
   const dateInput = document.getElementById("dashboard-date-range-1");
@@ -159,10 +165,14 @@ function initializeCalendar() {
         altFormat: "F Y",
       }),
     ],
-    onChange: (selectedDates) => {
+    onChange: async (selectedDates) => {
       if (selectedDates.length > 0) {
         const selectedDate = selectedDates[0];
-        generateCalendar(selectedDate.getMonth(), selectedDate.getFullYear());
+        currentMonth = selectedDate.getMonth(); // Atualiza o mês atual
+        currentYear = selectedDate.getFullYear(); // Atualiza o ano atual
+
+        await loadEventsFromFirestore(); // Recarrega eventos do Firestore
+        generateCalendar(currentMonth, currentYear); // Regera o calendário
       }
     },
   });
@@ -192,6 +202,8 @@ function generateCalendar(month, year) {
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   let day = 1;
+
+  const today = new Date(); // Obter a data de hoje
 
   for (let i = 0; i < 6; i++) {
     const row = document.createElement("tr");
@@ -232,6 +244,15 @@ function generateCalendar(month, year) {
 
         cell.appendChild(eventList);
 
+        // Verificar se o dia é o dia atual
+        if (
+          day === today.getDate() &&
+          month === today.getMonth() &&
+          year === today.getFullYear()
+        ) {
+          cell.classList.add("current-day");
+        }
+
         cell.addEventListener("click", ((currentDay, currentMonth, currentYear) => () => {
           openAddEventModal(currentDay, currentMonth, currentYear);
         })(day, month, year));
@@ -249,6 +270,24 @@ function generateCalendar(month, year) {
 
   calendarTable.appendChild(tbody);
 }
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const today = new Date();
+  const day = today.getDate();
+  const month = today.getMonth(); // Janeiro é 0!
+  const year = today.getFullYear();
+
+  console.log(`Hoje é: ${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
+
+  document.querySelectorAll('#calendario-section table tbody td').forEach(td => {
+    if (td.classList.contains("current-day")) {
+      console.log("Dia atual destacado com classe 'current-day':", td);
+    }
+  });
+  
+});
+
 
 function openAddEventModal(day, month, year) {
   const modal = document.getElementById("add-event-modal");

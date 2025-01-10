@@ -1098,11 +1098,13 @@ body {
 }
 
 #calendario-section table tbody td.current-day {
-  background-color: var(--color-success);
-  color: var(--color-light);
-  font-weight: 800;
-  border-radius: var(--border-radius-1);
+  background-color: rgba(0, 195, 255, 0.137);
+  color: white; /* Cor do texto */
+  font-weight: bold; /* Deixa o texto em negrito */
+  border-radius: 5px; /* Borda arredondada */
+  transition: background-color 0.3s ease; /* Transição suave */
 }
+
 
 #calendario-section table tbody span td {
   color: var(--color-dark);
