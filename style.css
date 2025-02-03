@@ -570,7 +570,6 @@ main .Calendario a {
   background-color: transparent;
   border-radius: var(--border-radius-1);
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
 .action-btn:hover {
@@ -658,11 +657,6 @@ main .Calendario a {
   animation: slideIn 0.4s ease-out;
 }
 
-button:focus,
-a:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 4px;
-}
 
 
 @keyframes slideIn {
@@ -723,7 +717,6 @@ a:focus {
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
 
@@ -1115,10 +1108,6 @@ body {
   cursor: pointer;
 }
 
-button:hover {
-  background-color: var(--color-primary-variant);
-}
-
 /* Lista de eventos */
 .event-list {
   list-style-type: none;
@@ -1242,4 +1231,53 @@ form select {
   }
 }
 
+.container-assinaturas {
+  height: 90vh;
+}
 
+.assinaturas {
+  padding: 20px;
+  height: 96%;
+  border-radius: 30px;
+  background-color: #202528;
+  box-shadow: var(--box-shadow);
+
+  display: flex;
+  justify-content: center; /* Centraliza os cards horizontalmente */
+  align-items: center; /* Centraliza os cards verticalmente */
+}
+
+/* Estiliza as setas */
+.arrow-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 2rem;
+  cursor: pointer;
+  transition: 0.3s;
+  margin: 0 20px;
+}
+
+.card {
+  text-align: center;
+  color: white;
+  width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card img {
+  box-shadow: var(--box-shadow);
+}
+
+.card img:hover {
+  scale: calc(102%);
+  transition: ease-in-out .2s;
+  cursor: pointer;
+}
+
+.editar-assinatura {
+  display: none;
+  padding: 10px;
+}

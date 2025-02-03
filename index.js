@@ -73,6 +73,41 @@ async function loadEventsFromFirestore() {
   }
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+  // Links do menu
+  const menuLinks = {
+    "dashboard-link": "Calendario-section",
+    "despesas-link": "assinaturas-section",
+    "configuracoes-link": "configuracoes-section",
+  };
+
+  // Adiciona evento de clique para cada link do menu
+  Object.keys(menuLinks).forEach((linkId) => {
+    document.getElementById(linkId).addEventListener("click", (e) => {
+      e.preventDefault();
+
+      // Esconder todas as seções
+      document.querySelectorAll(".tab-content").forEach((section) => {
+        section.style.display = "none";
+      });
+
+      // Mostrar a seção correspondente
+      const sectionToShow = document.getElementById(menuLinks[linkId]);
+      if (sectionToShow) {
+        sectionToShow.style.display = "block";
+      }
+
+      // Atualiza a classe ativa do menu
+      document.querySelectorAll(".sidebar a").forEach((link) => {
+        link.classList.remove("active");
+      });
+      document.getElementById(linkId).classList.add("active");
+    });
+  });
+});
+
+
+
 
 // Objeto para armazenar os eventos
 const events = {};
@@ -475,7 +510,30 @@ document.getElementById("add-event-form").addEventListener("submit", async (e) =
 });
 
 
+// ASSINATURAS
 
+const assinaturas = [
+  { titulo: "Assinatura Padrão", img: "/images/DANILO (2).png" },
+  { titulo: "Assinatura Premium", img: "/images/PREMIUM.png" },
+  { titulo: "Assinatura VIP", img: "/images/VIP.png" }
+];
 
+let assinaturaIndex = 0;
 
+const titulo = document.getElementById("assinatura-titulo");
+const imagem = document.getElementById("assinatura-img");
 
+document.getElementById("prev-assinatura").addEventListener("click", () => {
+  assinaturaIndex = (assinaturaIndex - 1 + assinaturas.length) % assinaturas.length;
+  atualizarAssinatura();
+});
+
+document.getElementById("next-assinatura").addEventListener("click", () => {
+  assinaturaIndex = (assinaturaIndex + 1) % assinaturas.length;
+  atualizarAssinatura();
+});
+
+function atualizarAssinatura() {
+  titulo.textContent = assinaturas[assinaturaIndex].titulo;
+  imagem.src = assinaturas[assinaturaIndex].img;
+}
