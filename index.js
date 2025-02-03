@@ -82,13 +82,11 @@ async function loadEventsFromFirestore() {
       });
     });
 
-    console.log("Eventos carregados do Firestore:", events);
     generateCalendar(currentMonth, currentYear);
   } catch (error) {
     console.error("Erro ao carregar eventos do Firestore:", error);
   }
 }
-
 
 
 // Objeto para armazenar os eventos
@@ -140,12 +138,7 @@ function changeMonth(direction) {
   console.log(`Mês atual: ${currentMonth}, Ano atual: ${currentYear}`);
 
   // Atualiza o texto do campo de data
-  const dateInput = document.getElementById("dashboard-date-range-1");
-  const monthNames = [
-    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-  ];
-  dateInput.value = `${monthNames[currentMonth]} ${currentYear}`;
+  updateDateInput(currentMonth, currentYear);
 
   // Recarrega os eventos e rege o calendário
   loadEventsFromFirestore().then(() => {
@@ -153,8 +146,23 @@ function changeMonth(direction) {
   });
 }
 
+function updateDateInput(month, year) {
+  const dateInput = document.getElementById("dashboard-date-range-1");
+  const monthNames = [
+    "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+    "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+  ];
+  dateInput.value = `${monthNames[month]} ${year}`;
+}
+
 function initializeCalendar() {
   const dateInput = document.getElementById("dashboard-date-range-1");
+
+  // Define o valor inicial do campo de data para o mês e ano atuais
+  const today = new Date();
+  currentMonth = today.getMonth();
+  currentYear = today.getFullYear();
+  updateDateInput(currentMonth, currentYear);
 
   flatpickr(dateInput, {
     locale: "pt",
@@ -177,8 +185,7 @@ function initializeCalendar() {
     },
   });
 
-  const today = new Date();
-  generateCalendar(today.getMonth(), today.getFullYear());
+  generateCalendar(currentMonth, currentYear);
 }
 
 function generateCalendar(month, year) {
@@ -277,8 +284,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const day = today.getDate();
   const month = today.getMonth(); // Janeiro é 0!
   const year = today.getFullYear();
-
-  console.log(`Hoje é: ${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
 
   document.querySelectorAll('#calendario-section table tbody td').forEach(td => {
     if (td.classList.contains("current-day")) {
