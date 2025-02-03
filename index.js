@@ -366,6 +366,49 @@ async function deleteEvent(date, index) {
   }
 }
 
+document.getElementById("edit-event-form").addEventListener("submit", async (e) => {
+  e.preventDefault(); // Impede o comportamento padrão do formulário
+
+  const modal = document.getElementById("edit-event-modal");
+  const eventId = document.getElementById("edit-event-id").value;
+  const date = document.getElementById("edit-event-date").value;
+  const title = document.getElementById("edit-event-title").value;
+  const description = document.getElementById("edit-event-description").value;
+  const type = document.getElementById("edit-event-type").value;
+
+  if (!eventId || !date || !title || !type) {
+    console.error("Erro: ID, Data, Título e Tipo são obrigatórios.");
+    return;
+  }
+
+  // Recupera a cor e ícone do evento atualizado
+  const { icon, color } = eventTypes[type] || { icon: "event", color: "#000000" };
+
+  try {
+    // Atualiza o evento no Firestore
+    const eventRef = doc(db, "events", eventId);
+    await updateDoc(eventRef, { title, description, type, color });
+
+    console.log("Evento atualizado:", eventId);
+
+    // Atualiza os dados localmente
+    const eventIndex = events[date].findIndex(event => event.id === eventId);
+    if (eventIndex !== -1) {
+      events[date][eventIndex] = { id: eventId, title, description, type, icon, color };
+    }
+
+    // Fecha modal e reseta formulário
+    modal.classList.remove("show");
+    e.target.reset();
+
+    // Atualiza o calendário sem apagar eventos antigos
+    generateCalendar(currentMonth, currentYear);
+
+  } catch (error) {
+    console.error("Erro ao atualizar evento:", error);
+  }
+});
+
 document.getElementById("close-edit-event-modal").addEventListener("click", () => {
   document.getElementById("edit-event-modal").classList.remove("show");
 });
