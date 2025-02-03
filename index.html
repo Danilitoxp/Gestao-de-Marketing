@@ -111,20 +111,16 @@
               <div id="event-list-container"></div>
 
               <form id="add-event-form">
+                <!-- Campos ocultos para armazenar ID e Data do evento -->
+                <input type="hidden" id="edit-event-id">
+                <input type="hidden" id="edit-event-date">
+              
                 <label for="event-title">Título do Evento:</label>
-                <input
-                  type="text"
-                  id="event-title"
-                  placeholder="Título do evento"
-                  required
-                />
-
+                <input type="text" id="event-title" placeholder="Título do evento" required>
+              
                 <label for="event-description">Descrição:</label>
-                <textarea
-                  id="event-description"
-                  placeholder="Descrição do evento"
-                ></textarea>
-
+                <textarea id="event-description" placeholder="Descrição do evento"></textarea>
+              
                 <label for="event-type">Tipo de Evento:</label>
                 <select id="event-type" required>
                   <option value="meeting">Reunião</option>
@@ -134,13 +130,47 @@
                   <option value="birthday">Aniversário</option>
                   <option value="special_day">Dia Especial</option>
                 </select>
-
+              
                 <button type="submit" class="primary action-btn">
                   Salvar Evento
                 </button>
               </form>
+              
             </div>
           </div>
+
+          <div id="edit-event-modal" class="modal">
+            <div class="modal-content">
+              <span class="close-btn" id="close-edit-event-modal">&times;</span>
+              <h2>Editar Evento</h2>
+              
+              <form id="edit-event-form">
+                <input type="hidden" id="edit-event-id">
+                <input type="hidden" id="edit-event-date">
+                
+                <label for="edit-event-title">Título:</label>
+                <input type="text" id="edit-event-title" required>
+          
+                <label for="edit-event-description">Descrição:</label>
+                <textarea id="edit-event-description"></textarea>
+          
+                <label for="edit-event-type">Tipo:</label>
+                <select id="edit-event-type">
+                  <option value="meeting">Reunião</option>
+                  <option value="recording">Gravação</option>
+                  <option value="event">Evento</option>
+                  <option value="training">Treinamento</option>
+                  <option value="birthday">Aniversário</option>
+                  <option value="special_day">Dia Especial</option>
+                </select>
+          
+                <button type="submit">Salvar</button>
+                <button type="button" id="delete-event-button" class="delete-btn">Excluir</button>
+              </form>
+            </div>
+          </div>
+          
+          
         </section>
 
         <!-- Configurações -->

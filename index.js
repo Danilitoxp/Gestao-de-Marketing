@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
 
 const firebaseConfig = {
@@ -18,12 +18,14 @@ const db = getFirestore(app);
 
 async function addEventToFirestore(date, title, description, type) {
   try {
-    // Referência à coleção "events"
+    const { icon, color } = eventTypes[type] || { icon: "event", color: "#000000" };
+
     const docRef = await addDoc(collection(db, "events"), {
       date,
       title,
       description,
       type,
+      color // Salva a cor no Firestore
     });
 
     console.log("Evento adicionado ao Firestore com ID:", docRef.id);
@@ -42,23 +44,6 @@ async function deleteEventFromFirestore(eventId) {
   }
 }
 
-function deleteEvent(date, index) {
-  const eventId = events[date][index].id; // Obtenha o ID do evento
-  deleteEventFromFirestore(eventId); // Exclua do Firestore
-
-  // Remova localmente
-  events[date].splice(index, 1);
-
-  if (events[date].length === 0) {
-    delete events[date];
-  }
-
-  const [year, month] = date.split("-").map(Number);
-  generateCalendar(month - 1, year);
-
-  const [day] = date.split("-").slice(-1);
-  openAddEventModal(Number(day), month - 1, year);
-}
 
 async function loadEventsFromFirestore() {
   try {
@@ -210,7 +195,7 @@ function generateCalendar(month, year) {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   let day = 1;
 
-  const today = new Date(); // Obter a data de hoje
+  const today = new Date();
 
   for (let i = 0; i < 6; i++) {
     const row = document.createElement("tr");
@@ -233,18 +218,26 @@ function generateCalendar(month, year) {
 
         // Verificar se há eventos na data atual
         if (events[currentDate]) {
-          events[currentDate].forEach((event) => {
+          events[currentDate].forEach((event, index) => {
             const listItem = document.createElement("li");
-            listItem.style.backgroundColor = event.color;
-
+            listItem.style.backgroundColor = event.color; // Aplica cor do evento
+        
             // Adicionar ícone e título ao item
             const icon = document.createElement("span");
             icon.className = "material-icons";
             icon.textContent = event.icon;
             icon.style.marginRight = "5px";
-
+        
             listItem.appendChild(icon);
             listItem.appendChild(document.createTextNode(event.title));
+        
+            // **Impede que abrir evento acione o modal de adicionar evento**
+            listItem.addEventListener("click", (e) => {
+              e.stopPropagation(); // Bloqueia a propagação do clique no dia
+              console.log("Editando evento:", event.title);
+              openEditEventModal(currentDate, index);
+            });
+
             eventList.appendChild(listItem);
           });
         }
@@ -252,16 +245,15 @@ function generateCalendar(month, year) {
         cell.appendChild(eventList);
 
         // Verificar se o dia é o dia atual
-        if (
-          day === today.getDate() &&
-          month === today.getMonth() &&
-          year === today.getFullYear()
-        ) {
+        if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
           cell.classList.add("current-day");
         }
 
-        cell.addEventListener("click", ((currentDay, currentMonth, currentYear) => () => {
-          openAddEventModal(currentDay, currentMonth, currentYear);
+        // Evento de clique no dia para adicionar evento (Somente se não clicar em um evento)
+        cell.addEventListener("click", ((currentDay, currentMonth, currentYear) => (e) => {
+          if (!e.target.classList.contains("event-list")) { // Verifica se não está clicando em um evento
+            openAddEventModal(currentDay, currentMonth, currentYear);
+          }
         })(day, month, year));
 
         day++;
@@ -304,51 +296,79 @@ function openAddEventModal(day, month, year) {
 
   // Limpa a lista de eventos anteriores no modal
   eventListContainer.innerHTML = "";
+}
 
-  // Exibe eventos existentes, se houver
-  if (events[date]) {
-    events[date].forEach((event, index) => {
-      const eventItem = document.createElement("div");
-      eventItem.className = "event-item";
+function openEditEventModal(date, index) {
+  const event = events[date] ? events[date][index] : null;
 
-      const title = document.createElement("p");
-      title.textContent = `Título: ${event.title}`;
+  if (!event) {
+    console.error("Erro: Evento não encontrado.");
+    return;
+  }
 
-      const description = document.createElement("p");
-      description.textContent = `Descrição: ${event.description}`;
+  // Buscar elementos do modal de edição
+  const modal = document.getElementById("edit-event-modal");
+  const titleInput = document.getElementById("edit-event-title");
+  const descriptionInput = document.getElementById("edit-event-description");
+  const typeInput = document.getElementById("edit-event-type");
+  const eventIdInput = document.getElementById("edit-event-id");
+  const eventDateInput = document.getElementById("edit-event-date");
+  const deleteButton = document.getElementById("delete-event-button");
 
-      // Botão de editar
-      const editButton = document.createElement("button");
-      editButton.textContent = "Editar";
-      editButton.className = "edit-btn";
-      editButton.addEventListener("click", () => editEvent(date, index));
+  if (!modal || !titleInput || !descriptionInput || !typeInput || !eventIdInput || !eventDateInput || !deleteButton) {
+    console.error("Erro: Um ou mais elementos do modal de edição não foram encontrados.");
+    return;
+  }
 
-      // Botão de excluir
-      const deleteButton = document.createElement("button");
-      deleteButton.textContent = "Excluir";
-      deleteButton.className = "delete-btn";
-      deleteButton.addEventListener("click", () => deleteEvent(date, index));
+  // Preencher os campos do modal de edição
+  titleInput.value = event.title || "";
+  descriptionInput.value = event.description || "";
+  typeInput.value = event.type || "";
+  eventIdInput.value = event.id || "";
+  eventDateInput.value = date || "";
 
-      eventItem.appendChild(title);
-      eventItem.appendChild(description);
-      eventItem.appendChild(editButton);
-      eventItem.appendChild(deleteButton);
+  // Adiciona evento ao botão de exclusão
+  deleteButton.onclick = () => deleteEvent(date, index);
 
-      eventListContainer.appendChild(eventItem);
-    });
+  // Exibir o modal de edição
+  modal.classList.add("show");
+}
+
+async function deleteEvent(date, index) {
+  const eventId = events[date][index].id; // Obtém o ID do evento do Firestore
+
+  if (!eventId) {
+    console.error("Erro: ID do evento não encontrado.");
+    return;
+  }
+
+  try {
+    // Exclui do Firestore
+    await deleteDoc(doc(db, "events", eventId));
+
+    console.log("Evento excluído:", eventId);
+
+    // Remove localmente
+    events[date].splice(index, 1);
+    if (events[date].length === 0) {
+      delete events[date];
+    }
+
+    // Fecha o modal de edição
+    document.getElementById("edit-event-modal").classList.remove("show");
+
+    // Atualiza o calendário
+    const [year, month] = date.split("-").map(Number);
+    generateCalendar(month - 1, year);
+
+  } catch (error) {
+    console.error("Erro ao excluir evento:", error);
   }
 }
 
-function editEvent(date, index) {
-  const event = events[date][index];
-
-  // Preenche os campos do formulário com os dados do evento
-  document.getElementById("event-title").value = event.title;
-  document.getElementById("event-description").value = event.description;
-
-  // Remove o evento atual para evitar duplicação
-  deleteEvent(date, index);
-}
+document.getElementById("close-edit-event-modal").addEventListener("click", () => {
+  document.getElementById("edit-event-modal").classList.remove("show");
+});
 
 
 // Fecha o modal
@@ -361,28 +381,57 @@ document.getElementById("add-event-form").addEventListener("submit", async (e) =
   e.preventDefault();
 
   const modal = document.getElementById("add-event-modal");
-  const date = modal.dataset.selectedDate;
+  const date = modal.dataset.selectedDate; // Obtém a data do modal
   const title = document.getElementById("event-title").value;
   const description = document.getElementById("event-description").value;
   const type = document.getElementById("event-type").value;
 
-  // Salvar evento localmente
-  const { icon, color } = eventTypes[type];
-  if (!events[date]) events[date] = [];
-  events[date].push({ title, description, type, icon, color });
+  if (!date || !title || !type) {
+    console.error("Erro: Data, título e tipo são obrigatórios.");
+    return;
+  }
 
-  // Salvar evento no Firestore
-  await addEventToFirestore(date, title, description, type);
+  // Recupera a cor e ícone do evento
+  const { icon, color } = eventTypes[type] || { icon: "event", color: "#000000" };
 
+  try {
+    // Adiciona evento ao Firestore
+    const docRef = await addDoc(collection(db, "events"), {
+      date,
+      title,
+      description,
+      type,
+      color
+    });
 
-  // Fechar modal e resetar formulário
-  modal.classList.remove("show");
-  e.target.reset();
+    console.log("Evento adicionado ao Firestore com ID:", docRef.id);
 
-  // Atualizar calendário
-  const [year, month] = date.split("-").map(Number);
-  generateCalendar(month - 1, year);
+    // Atualiza eventos localmente
+    if (!events[date]) events[date] = [];
+    events[date].push({
+      id: docRef.id,
+      title,
+      description,
+      type,
+      icon,
+      color
+    });
+
+    // Fecha modal e reseta formulário
+    modal.classList.remove("show");
+    e.target.reset();
+
+    // Atualizar calendário sem apagar eventos antigos
+    loadEventsFromFirestore().then(() => {
+      generateCalendar(currentMonth, currentYear);
+    });
+
+  } catch (error) {
+    console.error("Erro ao adicionar evento:", error);
+  }
 });
+
+
 
 
 

@@ -1035,7 +1035,7 @@ body {
   padding: 0;
 }
 
-#event-description {
+#event-description, #edit-event-description {
   width: 100%;
   height: 60px;
   border-radius: 5px;
@@ -1149,7 +1149,10 @@ button:hover {
   text-overflow: ellipsis; /* Adiciona reticências se o texto for muito longo */
 }
 
-
+.event-list li:hover {
+  scale: calc(105%);
+  transition: transform 0.5s ease-in-out; /* Ajusta a velocidade da transição */
+}
 
 .event-list li .material-icons {
   font-size: 16px; /* Ajuste o tamanho do ícone */
