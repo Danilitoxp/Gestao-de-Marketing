@@ -176,6 +176,7 @@ function handleDragEnd(e) {
 }
 
 
+
 // Adiciona eventos de dragover, dragleave e drop para cada coluna da esteira
 document.querySelectorAll('.esteira-column').forEach(column => {
   column.addEventListener('drop', async (e) => {
@@ -378,6 +379,167 @@ async function deleteCardFromFirestore(cardId) {
     console.error("Erro ao remover card do Firestore:", error);
   }
 }
+
+function getDragAfterElement(container, y) {
+  const draggableElements = [...container.querySelectorAll('.card:not(.dragging):not(.placeholder)')];
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - (box.top + box.height / 2);
+    if (offset < 0 && offset > closest.offset) {
+      return { offset: offset, element: child };
+    } else {
+      return closest;
+    }
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+document.querySelectorAll('.esteira-column').forEach(column => {
+  column.addEventListener('dragover', handleColumnDragOver);
+  column.addEventListener('dragleave', handleColumnDragLeave);
+  column.addEventListener('drop', handleColumnDrop);
+});
+
+function handleColumnDragOver(e) {
+  e.preventDefault();
+  const column = e.currentTarget;
+  const container = column.querySelector('.cards');
+
+  let placeholder = container.querySelector('.placeholder');
+  const draggingCard = document.querySelector('.card.dragging');
+
+  if (!placeholder && draggingCard) {
+    placeholder = document.createElement('div');
+    placeholder.classList.add('placeholder');
+    placeholder.style.height = draggingCard.offsetHeight + 'px';
+    container.appendChild(placeholder);
+  }
+
+  // Obtenha as dimensões do container
+  const containerRect = container.getBoundingClientRect();
+
+  if (e.clientY < containerRect.top) {
+    container.insertBefore(placeholder, container.firstChild);
+  } else if (e.clientY > containerRect.bottom) {
+    container.appendChild(placeholder);
+  } else {
+    const afterElement = getDragAfterElement(container, e.clientY);
+    if (!afterElement) {
+      container.appendChild(placeholder);
+    } else {
+      container.insertBefore(placeholder, afterElement);
+    }
+  }
+}
+
+function handleColumnDragLeave(e) {
+  // Verifica se o cursor ainda está na coluna
+  const relatedTarget = e.relatedTarget;
+  const column = e.currentTarget;
+  if (relatedTarget && column.contains(relatedTarget)) {
+    return;
+  }
+
+  const container = column.querySelector('.cards');
+  const placeholder = container.querySelector('.placeholder');
+  if (placeholder) {
+    placeholder.remove();
+  }
+}
+
+function handleColumnDrop(e) {
+  e.preventDefault();
+  const column = e.currentTarget;
+  const container = column.querySelector('.cards');
+
+  const placeholder = container.querySelector('.placeholder');
+  const elementId = e.dataTransfer.getData('text/plain');
+  const card = document.getElementById(elementId);
+
+  if (card) {
+    if (placeholder) {
+      container.insertBefore(card, placeholder);
+      placeholder.remove();
+    } else {
+      container.appendChild(card);
+    }
+  }
+
+  // Atualize a ordem do card no Firestore (opcional)
+  const order = Array.from(container.children).indexOf(card);
+  const firestoreId = card.dataset.cardId;
+  if (firestoreId) {
+    updateCardInFirestore(firestoreId, { order });
+  }
+}
+
+
+// Handler para o dragover no container (.cards)
+function handleDragOverContainer(e) {
+  e.preventDefault();
+  const container = e.currentTarget;
+  let placeholder = container.querySelector('.placeholder');
+
+  // Se não existir um placeholder, crie-o e defina sua altura igual ao do card sendo arrastado
+  const draggingCard = document.querySelector('.card.dragging');
+  if (!placeholder && draggingCard) {
+    placeholder = document.createElement('div');
+    placeholder.classList.add('placeholder');
+    placeholder.style.height = draggingCard.offsetHeight + 'px';
+  }
+
+  // Calcula onde inserir o placeholder com base na posição vertical do cursor
+  const afterElement = getDragAfterElement(container, e.clientY);
+  if (!afterElement) {
+    container.appendChild(placeholder);
+  } else {
+    container.insertBefore(placeholder, afterElement);
+  }
+}
+
+// Handler para remover o placeholder ao sair do container
+function handleDragLeaveContainer(e) {
+  const container = e.currentTarget;
+  const placeholder = container.querySelector('.placeholder');
+  if (placeholder) {
+    placeholder.remove();
+  }
+}
+
+// Registre os event listeners nos containers de cards
+document.querySelectorAll('.cards').forEach(container => {
+  container.addEventListener('dragover', handleDragOverContainer);
+  container.addEventListener('dragleave', handleDragLeaveContainer);
+  
+  container.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    const container = e.currentTarget;
+    const placeholder = container.querySelector('.placeholder');
+    
+    // Remove o placeholder e insere o card no local dele
+    if (placeholder) {
+      placeholder.remove();
+    }
+    
+    const elementId = e.dataTransfer.getData('text/plain');
+    const card = document.getElementById(elementId);
+    if (card) {
+      // Se houver um placeholder (caso ainda exista), insira o card antes dele;
+      // Caso contrário, insira no final
+      if (placeholder && container.contains(placeholder)) {
+        container.insertBefore(card, placeholder);
+      } else {
+        container.appendChild(card);
+      }
+      
+      // Atualize a posição (order) se necessário
+      const order = Array.from(container.children).indexOf(card);
+      const firestoreId = card.dataset.cardId;
+      if (firestoreId) {
+        await updateCardInFirestore(firestoreId, { order });
+      }
+    }
+  });
+});
 
 
 // Exemplo de utilização no formulário de adicionar card

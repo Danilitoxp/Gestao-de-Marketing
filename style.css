@@ -1274,12 +1274,13 @@ form select {
 .esteira-column {
   display: flex;
   flex-direction: column;
-  background-color: #181A1E;
+  background-color: #202528;
   border-radius: 8px;
   width: 320px;
   padding: 1.5rem;
-  height: 100%; /* ocupa toda a altura da esteira */
+  height: auto; /* Altura conforme o conteúdo */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  align-self: flex-start; /* Garante que a coluna não seja esticada */
 }
 
 /* Cabeçalho da coluna */
@@ -1302,16 +1303,18 @@ form select {
   border-radius: 4px;
 }
 
+
+
 /* Container do quadro */
 .esteira-board {
   display: flex;
   gap: 1rem;
   padding: 2rem;
   justify-content: center;
+  align-items: flex-start; /* Impede que as colunas sejam esticadas verticalmente */
   border-radius: 1rem;
   overflow-x: auto;
-  background: #202528; /* Fundo neutro similar ao Trello */
-  height: 90vh;
+  height: 90vh; /* Altura fixa para o quadro, se necessário */
 }
 
 /* Container dos cards */
@@ -1320,7 +1323,7 @@ form select {
   margin-bottom: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.5rem;
   overflow-y: auto;
   scrollbar-width: none;      /* Firefox */
   -ms-overflow-style: none;   /* IE e Edge */
@@ -1354,7 +1357,7 @@ form select {
 
 /* Estilização dos cards */
 .esteira-board .card {
-  background-color: #202528;
+  background-color: #181a1e;
   border-left: 5px solid #0079bf; /* Destaque com cor primária */
   border-radius: 8px;
   padding: 1rem;
@@ -1372,7 +1375,6 @@ form select {
 
 /* Botão para adicionar novos cards */
 .add-card {
-  margin-top: auto; /* empurra o botão para o fim da coluna */
   background-color: #0079bf;
   color: #fff;
   border: none;
@@ -1406,4 +1408,10 @@ form select {
   top: 50%;
   right: 5px;
   transform: translateY(-50%);
+}
+
+.placeholder {
+  margin: 0.5rem 0;
+  border-radius: var(--border-radius-1);
+  background: #181A1E;
 }
