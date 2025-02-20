@@ -849,8 +849,8 @@ document.getElementById('delete-card-button').addEventListener('click', async (e
   try {
     // Remove o documento do Firestore
     await deleteCardFromFirestore(firestoreId);
-    // Remove o card da interface
-    const card = document.getElementById(firestoreId);
+    // Remove o card da interface usando o atributo data-card-id
+    const card = document.querySelector(`[data-card-id="${firestoreId}"]`);
     if (card) {
       card.remove();
     }
@@ -860,3 +860,4 @@ document.getElementById('delete-card-button').addEventListener('click', async (e
     console.error("Erro ao excluir card:", error);
   }
 });
+
