@@ -14,6 +14,31 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+async function initializeAppData() {
+  try {
+    await loadEsteiraCardsFromFirestore();     // Carrega os cards da esteira
+    initializeCalendar();                      // Inicializa o calendário
+
+    // Adicione aqui outros event listeners ou inicializações, por exemplo:
+    const leftButton = document.getElementById("esquerta");
+    const rightButton = document.getElementById("direita");
+
+    leftButton.removeEventListener("click", () => changeMonth(-1));
+    rightButton.removeEventListener("click", () => changeMonth(1));
+
+    leftButton.addEventListener("click", () => changeMonth(-1));
+    rightButton.addEventListener("click", () => changeMonth(1));
+
+    console.log("Aplicação inicializada com sucesso!");
+  } catch (error) {
+    console.error("Erro durante a inicialização:", error);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", initializeAppData);
+
+
+
 // Funções Firebase
 
 async function addEventToFirestore(date, title, description, type) {
@@ -71,41 +96,326 @@ async function loadEventsFromFirestore() {
   } catch (error) {
     console.error("Erro ao carregar eventos do Firestore:", error);
   }
+  
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Links do menu
+  // Mapeamento dos links do menu para as respectivas seções
   const menuLinks = {
     "dashboard-link": "Calendario-section",
     "despesas-link": "assinaturas-section",
+    "esteira-link": "esteira-section", // Adicionado para a sessão Esteira
     "configuracoes-link": "configuracoes-section",
   };
 
   // Adiciona evento de clique para cada link do menu
   Object.keys(menuLinks).forEach((linkId) => {
-    document.getElementById(linkId).addEventListener("click", (e) => {
-      e.preventDefault();
+    const linkElement = document.getElementById(linkId);
+    if (linkElement) {
+      linkElement.addEventListener("click", (e) => {
+        e.preventDefault();
 
-      // Esconder todas as seções
-      document.querySelectorAll(".tab-content").forEach((section) => {
-        section.style.display = "none";
+        // Esconde todas as seções
+        document.querySelectorAll(".tab-content").forEach((section) => {
+          section.style.display = "none";
+        });
+
+        // Mostra a seção correspondente ao link clicado
+        const sectionToShow = document.getElementById(menuLinks[linkId]);
+        if (sectionToShow) {
+          sectionToShow.style.display = "block";
+        }
+
+        // Atualiza a classe ativa no menu
+        document.querySelectorAll(".sidebar a").forEach((link) => {
+          link.classList.remove("active");
+        });
+        linkElement.classList.add("active");
       });
-
-      // Mostrar a seção correspondente
-      const sectionToShow = document.getElementById(menuLinks[linkId]);
-      if (sectionToShow) {
-        sectionToShow.style.display = "block";
-      }
-
-      // Atualiza a classe ativa do menu
-      document.querySelectorAll(".sidebar a").forEach((link) => {
-        link.classList.remove("active");
-      });
-      document.getElementById(linkId).classList.add("active");
-    });
+    }
   });
 });
 
+
+// ----------------------
+// FUNÇÃO: Abrir modal de adicionar card na Esteira
+// ----------------------
+document.querySelectorAll('.esteira-column').forEach(column => {
+  column.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    column.classList.add('drag-over');
+  });
+  column.addEventListener('dragleave', () => {
+    column.classList.remove('drag-over');
+  });
+});
+
+
+// ----------------------
+// FUNÇÃO: Fechar modal de adicionar card
+// ----------------------
+document.getElementById('close-add-card-modal').addEventListener('click', () => {
+  document.getElementById('add-card-modal').classList.remove('show');
+});
+
+// ----------------------
+// FUNÇÃO: Submeter novo card via modal
+// ----------------------
+
+// ----------------------
+// FUNÇÕES: Drag & Drop dos Cards
+// ----------------------
+function handleDragStart(e) {
+  e.dataTransfer.setData('text/plain', e.target.id);
+  e.dataTransfer.effectAllowed = 'move';
+  e.target.classList.add('dragging');
+}
+
+function handleDragEnd(e) {
+  e.target.classList.remove('dragging');
+}
+
+
+// Adiciona eventos de dragover, dragleave e drop para cada coluna da esteira
+document.querySelectorAll('.esteira-column').forEach(column => {
+  column.addEventListener('drop', async (e) => {
+    e.preventDefault();
+    column.classList.remove('drag-over');
+    // Obtém o ID do elemento (usado para identificar o card no DOM)
+    const elementId = e.dataTransfer.getData('text/plain');
+    const card = document.getElementById(elementId);
+    if (card) {
+      // Move o card para o container .cards da coluna alvo
+      const cardsContainer = column.querySelector('.cards');
+      cardsContainer.appendChild(card);
+      
+      // Obtém o nome da nova coluna a partir do header da coluna
+      const newColumn = column.querySelector('header').textContent.trim();
+      
+      // Se quiser salvar também a ordem (posição) do card dentro da coluna:
+      const order = Array.from(cardsContainer.children).indexOf(card);
+      
+      // Use o Firestore ID armazenado no dataset do card
+      const firestoreId = card.dataset.cardId;
+      if (firestoreId) {
+        await updateCardInFirestore(firestoreId, { column: newColumn, order });
+      } else {
+        console.error("Firestore ID não encontrado no dataset do card", card);
+      }
+    }
+  });
+});
+
+
+// Função para abrir o modal de edição de card
+function openEditCardModal(card) {
+  const modal = document.getElementById('edit-card-modal');
+  // Armazena o ID do card no dataset do modal
+  modal.dataset.cardId = card.id;
+  // Extrai o título e a descrição do card (assumindo que o título esteja em <strong> e a descrição em <p>)
+  const title = card.querySelector('strong') ? card.querySelector('strong').textContent : '';
+  const description = card.querySelector('p') ? card.querySelector('p').textContent : '';
+  document.getElementById('edit-card-title').value = title;
+  document.getElementById('edit-card-description').value = description;
+  modal.classList.add('show');
+}
+
+// Event listener para fechar o modal de edição de card
+document.getElementById('close-edit-card-modal').addEventListener('click', () => {
+  document.getElementById('edit-card-modal').classList.remove('show');
+});
+
+// Event listener para o formulário de edição de card
+document.getElementById('edit-card-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const modal = document.getElementById('edit-card-modal');
+  const cardId = modal.dataset.cardId;
+  const title = document.getElementById('edit-card-title').value;
+  const description = document.getElementById('edit-card-description').value;
+
+  // Atualiza o conteúdo do card na interface
+  const card = document.getElementById(cardId);
+  if (card) {
+    card.innerHTML = `<strong>${title}</strong>${description ? `<p>${description}</p>` : ''}`;
+    // Reanexa os event listeners para drag & drop e clique
+    card.addEventListener('dragstart', handleDragStart);
+    card.addEventListener('dragend', handleDragEnd);
+    card.addEventListener('click', (e) => {
+      if (!card.classList.contains('dragging')) {
+        openEditCardModal(card);
+      }
+    });
+  }
+  
+  // Atualiza os dados no Firestore
+  await updateCardInFirestore(cardId, { title, description });
+  
+  modal.classList.remove('show');
+});
+
+
+// Adiciona um novo card na coleção "esteiraCards"
+async function addCardToFirestore(column, title, description) {
+  try {
+    // Usamos o timestamp para gerar uma ordem (você pode ajustar conforme necessário)
+    const order = Date.now();
+    const docRef = await addDoc(collection(db, "esteiraCards"), {
+      column, title, description,
+      order,
+      createdAt: new Date()
+    });
+    console.log("Card adicionado ao Firestore com ID:", docRef.id);
+    return docRef.id;
+  } catch (error) {
+    console.error("Erro ao adicionar card ao Firestore:", error);
+  }
+}
+
+// Atualiza os dados de um card (quando editado ou movido)
+async function updateCardInFirestore(cardId, newData) {
+  try {
+    const cardRef = doc(db, "esteiraCards", cardId);
+    await updateDoc(cardRef, newData);
+    console.log("Card atualizado:", cardId);
+  } catch (error) {
+    console.error("Erro ao atualizar card no Firestore:", error);
+  }
+}
+
+document.querySelectorAll('.esteira-column .add-card').forEach(button => {
+  button.addEventListener('click', (e) => {
+    // Obtém o container da coluna (pai do botão)
+    const columnElement = e.target.closest('.esteira-column');
+    if (!columnElement) return;
+    // Pega o texto do header que indica o nome da coluna
+    const columnHeader = columnElement.querySelector('header').textContent.trim();
+    // Seleciona o modal de adicionar card e seta o dataset com a coluna
+    const modal = document.getElementById('add-card-modal');
+    modal.dataset.column = columnHeader;
+    modal.classList.add('show');
+  });
+});
+
+
+// Carrega os cards da coleção "esteiraCards" e os insere nas respectivas colunas
+async function loadEsteiraCardsFromFirestore() {
+  try {
+    // Limpa os cards atuais nas colunas
+    document.querySelectorAll('.esteira-column .cards').forEach(cardsContainer => {
+      cardsContainer.innerHTML = "";
+    });
+
+    const querySnapshot = await getDocs(collection(db, "esteiraCards"));
+    querySnapshot.forEach((docSnap) => {
+      const cardData = docSnap.data();
+      // Cria um card com os dados carregados e define o Firestore ID no dataset
+      const card = createCardElement(cardData.title, cardData.description);
+      card.dataset.cardId = docSnap.id;
+      // Insere o card na coluna correspondente
+      document.querySelectorAll('.esteira-column').forEach(col => {
+        if (col.querySelector('header').textContent.trim() === cardData.column) {
+          col.querySelector('.cards').appendChild(card);
+        }
+      });
+    });
+  } catch (error) {
+    console.error("Erro ao carregar cards da esteira do Firestore:", error);
+  }
+}
+
+
+// Exemplo de como adicionar o event listener de duplo clique ao criar um novo card
+function createCardElement(title, description) {
+  const card = document.createElement('div');
+  card.classList.add('card');
+  card.draggable = true;
+  card.id = 'card-' + Date.now(); // Gera um ID único para o DOM (o Firestore ID virá do dataset)
+
+  // Cria um container para o conteúdo do card
+  const cardContent = document.createElement('div');
+  cardContent.classList.add('card-content');
+  cardContent.innerHTML = `<strong>${title}</strong>${description ? `<p>${description}</p>` : ''}`;
+
+  // Cria o ícone de remoção
+  const removeIcon = document.createElement('span');
+  removeIcon.classList.add('material-icons', 'remove-card');
+  removeIcon.textContent = 'delete_sweep';
+
+  // Impede que o clique no ícone dispare outros eventos (como abrir o modal de edição)
+  removeIcon.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    await removeCard(card);
+  });
+
+  // Adiciona o conteúdo e o ícone ao card
+  card.appendChild(cardContent);
+  card.appendChild(removeIcon);
+
+  // Adiciona os event listeners para drag & drop
+  card.addEventListener('dragstart', handleDragStart);
+  card.addEventListener('dragend', handleDragEnd);
+
+  // Ao clicar, abre o modal de edição (caso não esteja sendo arrastado)
+  card.addEventListener('click', (e) => {
+    if (!card.classList.contains('dragging')) {
+      openEditCardModal(card);
+    }
+  });
+
+  return card;
+}
+
+async function removeCard(card) {
+  const firestoreId = card.dataset.cardId;
+  if (!firestoreId) {
+    console.error("Firestore ID não encontrado para remoção.");
+    return;
+  }
+  try {
+    await deleteCardFromFirestore(firestoreId);
+    card.remove();
+  } catch (error) {
+    console.error("Erro ao remover card:", error);
+  }
+}
+
+async function deleteCardFromFirestore(cardId) {
+  try {
+    await deleteDoc(doc(db, "esteiraCards", cardId));
+    console.log("Card removido com sucesso:", cardId);
+  } catch (error) {
+    console.error("Erro ao remover card do Firestore:", error);
+  }
+}
+
+
+// Exemplo de utilização no formulário de adicionar card
+document.getElementById('add-card-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const modal = document.getElementById('add-card-modal');
+  const column = modal.dataset.column; // Nome da coluna selecionada (ex: "A Fazer", "Em Andamento", "Concluído")
+  const title = document.getElementById('card-title').value;
+  const description = document.getElementById('card-description').value;
+  
+  // Adiciona o card ao Firestore e obtém o ID
+  const cardId = await addCardToFirestore(column, title, description);
+  
+  // Cria o novo card utilizando a função criada e atribui o Firestore ID
+  const card = createCardElement(title, description);
+  card.dataset.cardId = cardId;
+  
+  // Insere o card na coluna correta
+  document.querySelectorAll('.esteira-column').forEach(col => {
+    if (col.querySelector('header').textContent.trim() === column) {
+      col.querySelector('.cards').appendChild(card);
+    }
+  });
+  
+  // Limpa o formulário e fecha o modal
+  document.getElementById('add-card-form').reset();
+  modal.classList.remove('show');
+});
 
 
 

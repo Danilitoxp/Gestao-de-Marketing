@@ -1,187 +1,298 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestão de Marketing | Carflax</title>
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="shortcut icon" href="/images/Favicon.svg" type="image/x-icon" />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      rel="shortcut icon"
+      href="/images/Carflax Logomarca vertical.svg"
+      type="image/x-icon"
+    />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gestão de Marketing | Carflax</title>
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <link rel="stylesheet" href="./style.css" />
-  <link rel="shortcut icon" href="/images/Favicon.svg" type="image/x-icon" />
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/pt.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="shortcut icon" href="/images/Carflax Logomarca vertical.svg" type="image/x-icon" />
-</head>
-
-<body>
-  <div class="container">
-    <!-- Sidebar -->
-    <aside>
-      <div class="top">
-        <div class="logo">
-          <a href=""><img src="/images/Carflax Logomarca vertical.svg" alt="Logo" /></a>
-        </div>
-        <div class="close" id="close-btn">
-          <span class="material-icons-sharp">Fechar</span>
-        </div>
-      </div>
-      <div class="sidebar">
-        <a href="#" id="dashboard-link" class="active">
-          <span class="material-icons-sharp">dashboard</span>
-          <h3>Calendário</h3>
-        </a>
-        <a href="#" id="servicos-link">
-          <span class="material-icons-sharp">local_activity</span>
-          <h3>Treinamentos</h3>
-        </a>
-        <a href="#" id="despesas-link">
-          <span class="material-icons-sharp">point_of_sale</span>
-          <h3>Assinaturas</h3>
-        </a>
-
-        <a href="#" id="configuracoes-link">
-          <span class="material-icons-sharp">settings</span>
-          <h3>Configurações</h3>
-        </a>
-        <a href="" id="sair-link">
-          <span class="material-icons-sharp">logout</span>
-          <h3>Sair</h3>
-        </a>
-      </div>
-    </aside>
-
-    <div class="notifications"></div>
-    <!-- Notifications container -->
-
-    <main>
-      <!-- Painel de Controle -->
-      <section id="Calendario-section" class="tab-content">
-        <div class="date">
-          <div class="date-picker-container">
-            <i class="fas fa-calendar-alt calendar-icon"></i>
-            <input id="dashboard-date-range-1" placeholder="Janeiro 2025" class="search-input" />
+  <body>
+    <div class="container">
+      <!-- Sidebar -->
+      <aside>
+        <div class="top">
+          <div class="logo">
+            <a href=""
+              ><img src="/images/Carflax Logomarca vertical.svg" alt="Logo"
+            /></a>
           </div>
-
-          <div class="controles">
-            <button id="esquerta">&lt;</button>
-            <button id="direita">&gt;</button>
+          <div class="close" id="close-btn">
+            <span class="material-icons-sharp">Fechar</span>
           </div>
         </div>
+        <div class="sidebar">
+          <a href="#" id="dashboard-link" class="active">
+            <span class="material-icons-sharp">dashboard</span>
+            <h3>Calendário</h3>
+          </a>
+          
+          <a href="#" id="esteira-link">
+            <span class="material-icons-sharp">category</span>
+            <h3>Esteira</h3>
+          </a>
 
-        <!-- Calendário -->
-        <section id="calendario-section" class="Calendario">
-          <div class="Calendario">
-            <table></table>
+          <a href="#" id="despesas-link">
+            <span class="material-icons-sharp">point_of_sale</span>
+            <h3>Assinaturas</h3>
+          </a>
+          
+          <a href="#" id="servicos-link">
+            <span class="material-icons-sharp">local_activity</span>
+            <h3>Treinamentos</h3>
+          </a>
+          <a href="#" id="configuracoes-link">
+            <span class="material-icons-sharp">settings</span>
+            <h3>Configurações</h3>
+          </a>
+          <a href="" id="sair-link">
+            <span class="material-icons-sharp">logout</span>
+            <h3>Sair</h3>
+          </a>
+        </div>
+      </aside>
+
+      <div class="notifications"></div>
+      <!-- Notifications container -->
+
+      <main>
+        <!-- Painel de Controle -->
+        <section id="Calendario-section" class="tab-content">
+          <div class="date">
+            <div class="date-picker-container">
+              <i class="fas fa-calendar-alt calendar-icon"></i>
+              <input
+                id="dashboard-date-range-1"
+                placeholder="Janeiro 2025"
+                class="search-input"
+              />
+            </div>
+
+            <div class="controles">
+              <button id="esquerta">&lt;</button>
+              <button id="direita">&gt;</button>
+            </div>
+          </div>
+
+          <!-- Calendário -->
+          <section id="calendario-section" class="Calendario">
+            <div class="Calendario">
+              <table></table>
+            </div>
+          </section>
+
+          <div id="add-event-modal" class="modal">
+            <div class="modal-content">
+              <span class="close-btn" id="close-event-modal">&times;</span>
+              <h2>Adicionar Eventos</h2>
+
+              <!-- Lista de eventos existentes -->
+              <div id="event-list-container"></div>
+
+              <form id="add-event-form">
+                <!-- Campos ocultos para armazenar ID e Data do evento -->
+                <input type="hidden" id="edit-event-id" />
+                <input type="hidden" id="edit-event-date" />
+
+                <label for="event-title">Título do Evento:</label>
+                <input
+                  type="text"
+                  id="event-title"
+                  placeholder="Título do evento"
+                  required
+                />
+
+                <label for="event-description">Descrição:</label>
+                <textarea
+                  id="event-description"
+                  placeholder="Descrição do evento"
+                ></textarea>
+
+                <label for="event-type">Tipo de Evento:</label>
+                <select id="event-type" required>
+                  <option value="meeting">Reunião</option>
+                  <option value="recording">Gravação</option>
+                  <option value="event">Evento</option>
+                  <option value="training">Treinamento</option>
+                  <option value="birthday">Aniversário</option>
+                  <option value="special_day">Dia Especial</option>
+                </select>
+
+                <button type="submit" class="primary action-btn">
+                  Salvar Evento
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div id="edit-event-modal" class="modal">
+            <div class="modal-content">
+              <span class="close-btn" id="close-edit-event-modal">&times;</span>
+              <h2>Editar Evento</h2>
+
+              <form id="edit-event-form">
+                <input type="hidden" id="edit-event-id" />
+                <input type="hidden" id="edit-event-date" />
+
+                <label for="edit-event-title">Título:</label>
+                <input type="text" id="edit-event-title" required />
+
+                <label for="edit-event-description">Descrição:</label>
+                <textarea id="edit-event-description"></textarea>
+
+                <label for="edit-event-type">Tipo:</label>
+                <select id="edit-event-type">
+                  <option value="meeting">Reunião</option>
+                  <option value="recording">Gravação</option>
+                  <option value="event">Evento</option>
+                  <option value="training">Treinamento</option>
+                  <option value="birthday">Aniversário</option>
+                  <option value="special_day">Dia Especial</option>
+                </select>
+
+                <button type="submit" class="primary action-btn">Salvar</button>
+                <button
+                  type="button"
+                  id="delete-event-button"
+                  class="delete-btn"
+                >
+                  Excluir
+                </button>
+              </form>
+            </div>
           </div>
         </section>
 
-        <div id="add-event-modal" class="modal">
-          <div class="modal-content">
-            <span class="close-btn" id="close-event-modal">&times;</span>
-            <h2>Adicionar Eventos</h2>
+        <!-- Seção de Assinaturas -->
+        <section
+          id="assinaturas-section"
+          class="tab-content"
+          style="display: none"
+        >
+          <div class="container-assinaturas">
+            <h1>Assinaturas</h1>
+            <div class="assinaturas">
+              <!-- Botão de seta para a esquerda -->
 
-            <!-- Lista de eventos existentes -->
-            <div id="event-list-container"></div>
-
-            <form id="add-event-form">
-              <!-- Campos ocultos para armazenar ID e Data do evento -->
-              <input type="hidden" id="edit-event-id" />
-              <input type="hidden" id="edit-event-date" />
-
-              <label for="event-title">Título do Evento:</label>
-              <input type="text" id="event-title" placeholder="Título do evento" required />
-
-              <label for="event-description">Descrição:</label>
-              <textarea id="event-description" placeholder="Descrição do evento"></textarea>
-
-              <label for="event-type">Tipo de Evento:</label>
-              <select id="event-type" required>
-                <option value="meeting">Reunião</option>
-                <option value="recording">Gravação</option>
-                <option value="event">Evento</option>
-                <option value="training">Treinamento</option>
-                <option value="birthday">Aniversário</option>
-                <option value="special_day">Dia Especial</option>
-              </select>
-
-              <button type="submit" class="primary action-btn">
-                Salvar Evento
-              </button>
-            </form>
-          </div>
-        </div>
-
-        <div id="edit-event-modal" class="modal">
-          <div class="modal-content">
-            <span class="close-btn" id="close-edit-event-modal">&times;</span>
-            <h2>Editar Evento</h2>
-
-            <form id="edit-event-form">
-              <input type="hidden" id="edit-event-id" />
-              <input type="hidden" id="edit-event-date" />
-
-              <label for="edit-event-title">Título:</label>
-              <input type="text" id="edit-event-title" required />
-
-              <label for="edit-event-description">Descrição:</label>
-              <textarea id="edit-event-description"></textarea>
-
-              <label for="edit-event-type">Tipo:</label>
-              <select id="edit-event-type">
-                <option value="meeting">Reunião</option>
-                <option value="recording">Gravação</option>
-                <option value="event">Evento</option>
-                <option value="training">Treinamento</option>
-                <option value="birthday">Aniversário</option>
-                <option value="special_day">Dia Especial</option>
-              </select>
-
-              <button type="submit" class="primary action-btn">Salvar</button>
-              <button type="button" id="delete-event-button" class="delete-btn">
-                Excluir
-              </button>
-            </form>
-          </div>
-        </div>
-      </section>
-
-      <!-- Seção de Assinaturas -->
-      <section id="assinaturas-section" class="tab-content" style="display: none">
-        <div class="container-assinaturas">
-          <h1>Assinaturas</h1>
-          <div class="assinaturas">
-            <!-- Botão de seta para a esquerda -->
-            
-            <button id="prev-assinatura" class="arrow-btn">&#10094;</button>
-            <div class="card">
-
-              <div class="assinatura">
-                <h1 id="assinatura-titulo">Assinatura Padrão</h1>
-                <img id="assinatura-img" src="/images/DANILO (2).png" alt="">
+              <button id="prev-assinatura" class="arrow-btn">&#10094;</button>
+              <div class="card">
+                <div class="assinatura">
+                  <h1 id="assinatura-titulo">Assinatura Padrão</h1>
+                  <img
+                    id="assinatura-img"
+                    src="/images/DANILO (2).png"
+                    alt=""
+                  />
+                </div>
               </div>
+
+              <!-- Botão de seta para a direita -->
+              <button id="next-assinatura" class="arrow-btn">&#10095;</button>
             </div>
-      
-            <!-- Botão de seta para a direita -->
-            <button id="next-assinatura" class="arrow-btn">&#10095;</button>
-          </div>
 
-          <div class="editar-assinatura" display="'none">
-            <img src="/images/DANILO (2).png" alt="">
+            <div class="editar-assinatura" display="'none">
+              <img src="/images/DANILO (2).png" alt="" />
+            </div>
           </div>
-        </div>
-      </section>
-      
-    </main>
+        </section>
+
+        <!-- Seção Esteira -->
+        <section id="esteira-section" class="tab-content" style="display: none">
+          <!-- Estrutura do quadro estilo Trello (A Fazer, Em Andamento, Concluído) -->
+          <div class="esteira-board">
+            <!-- Coluna "A Fazer" -->
+            <div class="esteira-column">
+              <header>A Fazer</header>
+              <div class="cards">
+              </div>
+              <button class="add-card">+ Adicionar Card</button>
+            </div>
+            <!-- Coluna "Em Andamento" -->
+            <div class="esteira-column">
+              <header>Em Andamento</header>
+              <div class="cards">
+              </div>
+              <button class="add-card">+ Adicionar Card</button>
+            </div>
+            <!-- Coluna "Concluído" -->
+            <div class="esteira-column">
+              <header>Concluído</header>
+              <div class="cards">
+              </div>
+              <button class="add-card">+ Adicionar Card</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Modal para adicionar card na Esteira -->
+<div id="add-card-modal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" id="close-add-card-modal">&times;</span>
+    <h2>Adicionar Card</h2>
+    <form id="add-card-form">
+      <!-- Campo oculto para identificar a coluna -->
+      <input type="hidden" id="card-column" value="" />
+      <label for="card-title">Título:</label>
+      <input type="text" id="card-title" placeholder="Título do card" required />
+      <label for="card-description">Descrição:</label>
+      <textarea id="card-description" placeholder="Descrição opcional"></textarea>
+      <button type="submit" class="primary action-btn">Salvar Card</button>
+    </form>
   </div>
+</div>
 
-  <script type="module" src="index.js"></script>
-</body>
+<!-- Modal para editar card na Esteira -->
+<div id="edit-card-modal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" id="close-edit-card-modal">&times;</span>
+    <h2>Editar Card</h2>
+    <form id="edit-card-form">
+      <!-- Campo oculto para identificar o card -->
+      <input type="hidden" id="edit-card-id" value="" />
+      <label for="edit-card-title">Título:</label>
+      <input type="text" id="edit-card-title" placeholder="Título do card" required />
+      <label for="edit-card-description">Descrição:</label>
+      <textarea id="edit-card-description" placeholder="Descrição opcional"></textarea>
+      <button type="submit" class="primary action-btn">Salvar Alterações</button>
+    </form>
+  </div>
+</div>
 
+
+      </main>
+    </div>
+
+    <script type="module" src="index.js"></script>
+  </body>
 </html>
