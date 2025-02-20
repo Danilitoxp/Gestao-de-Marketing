@@ -720,12 +720,6 @@ main .Calendario a {
 }
 
 
-.modal-content button:hover {
-  background: var(--color-primary-variant);
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(103, 178, 50, 0.3);
-}
-
 .close-btn {
   position: absolute;
   top: 1rem;
@@ -736,11 +730,6 @@ main .Calendario a {
   background: none;
   border: none;
   transition: all 0.3s ease;
-}
-
-.close-btn:hover {
-  color: var(--color-danger);
-  transform: scale(1.1);
 }
 
 /* NOTIFICAÇÕES */
@@ -1341,11 +1330,26 @@ form select {
   display: none;              /* Chrome, Safari e Opera */
 }
 
-#card-description {
+#edit-card-description, #card-description {
   width: 100%;
   height: 200px;
   padding: 1rem;
   border-radius: 0.5rem;
+  color: #7D8DA1;
+}
+
+#close-edit-card-modal {
+  background-color: transparent;
+  position: absolute;
+  left: 430px;
+  font-size: 2rem;
+  color: white;
+  width: 10px;
+  height: 10px;
+}
+
+#close-edit-card-modal:hover {
+  box-shadow: transparent;
 }
 
 /* Estilização dos cards */

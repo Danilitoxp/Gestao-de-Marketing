@@ -67,7 +67,7 @@
             <span class="material-icons-sharp">point_of_sale</span>
             <h3>Assinaturas</h3>
           </a>
-          
+
           <a href="#" id="servicos-link">
             <span class="material-icons-sharp">local_activity</span>
             <h3>Treinamentos</h3>
@@ -275,17 +275,17 @@
 <!-- Modal para editar card na Esteira -->
 <div id="edit-card-modal" class="modal">
   <div class="modal-content">
-    <span class="close-btn" id="close-edit-card-modal">&times;</span>
+    <button class="close-btn" id="close-edit-card-modal">&times;</button>
     <h2>Editar Card</h2>
     <form id="edit-card-form">
-      <!-- Campo oculto para identificar o card -->
-      <input type="hidden" id="edit-card-id" value="" />
       <label for="edit-card-title">Título:</label>
-      <input type="text" id="edit-card-title" placeholder="Título do card" required />
+      <input type="text" id="edit-card-title" required />
       <label for="edit-card-description">Descrição:</label>
-      <textarea id="edit-card-description" placeholder="Descrição opcional"></textarea>
+      <textarea id="edit-card-description"></textarea>
       <button type="submit" class="primary action-btn">Salvar Alterações</button>
     </form>
+    <!-- Botão para excluir o card -->
+    <button id="delete-card-button" class="delete-btn">Excluir Card</button>
   </div>
 </div>
 

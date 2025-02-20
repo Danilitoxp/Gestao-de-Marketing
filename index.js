@@ -336,20 +336,8 @@ function createCardElement(title, description) {
   cardContent.classList.add('card-content');
   cardContent.innerHTML = `<strong>${title}</strong>${description ? `<p>${description}</p>` : ''}`;
 
-  // Cria o ícone de remoção
-  const removeIcon = document.createElement('span');
-  removeIcon.classList.add('material-icons', 'remove-card');
-  removeIcon.textContent = 'delete_sweep';
-
-  // Impede que o clique no ícone dispare outros eventos (como abrir o modal de edição)
-  removeIcon.addEventListener('click', async (e) => {
-    e.stopPropagation();
-    await removeCard(card);
-  });
-
-  // Adiciona o conteúdo e o ícone ao card
+  // Adiciona somente o conteúdo ao card
   card.appendChild(cardContent);
-  card.appendChild(removeIcon);
 
   // Adiciona os event listeners para drag & drop
   card.addEventListener('dragstart', handleDragStart);
@@ -364,6 +352,7 @@ function createCardElement(title, description) {
 
   return card;
 }
+
 
 async function removeCard(card) {
   const firestoreId = card.dataset.cardId;
@@ -847,3 +836,25 @@ function atualizarAssinatura() {
   titulo.textContent = assinaturas[assinaturaIndex].titulo;
   imagem.src = assinaturas[assinaturaIndex].img;
 }
+
+document.getElementById('delete-card-button').addEventListener('click', async (e) => {
+  const modal = document.getElementById('edit-card-modal');
+  const firestoreId = modal.dataset.cardId;
+  if (!firestoreId) {
+    console.error("ID do card não encontrado.");
+    return;
+  }
+  try {
+    // Remove o documento do Firestore
+    await deleteCardFromFirestore(firestoreId);
+    // Remove o card da interface
+    const card = document.getElementById(firestoreId);
+    if (card) {
+      card.remove();
+    }
+    // Fecha o modal
+    modal.classList.remove('show');
+  } catch (error) {
+    console.error("Erro ao excluir card:", error);
+  }
+});
