@@ -1277,6 +1277,7 @@ form select {
   background-color: #202528;
   border-radius: 8px;
   width: 320px;
+  max-height: 80vh;
   padding: 1.5rem;
   height: auto; /* Altura conforme o conteúdo */
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
