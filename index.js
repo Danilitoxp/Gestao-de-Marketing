@@ -210,8 +210,8 @@ document.querySelectorAll('.esteira-column').forEach(column => {
 // Função para abrir o modal de edição de card
 function openEditCardModal(card) {
   const modal = document.getElementById('edit-card-modal');
-  // Armazena o ID do card no dataset do modal
-  modal.dataset.cardId = card.id;
+  // Use o Firestore ID armazenado no dataset do card
+  modal.dataset.cardId = card.dataset.cardId;
   // Extrai o título e a descrição do card (assumindo que o título esteja em <strong> e a descrição em <p>)
   const title = card.querySelector('strong') ? card.querySelector('strong').textContent : '';
   const description = card.querySelector('p') ? card.querySelector('p').textContent : '';
@@ -219,6 +219,7 @@ function openEditCardModal(card) {
   document.getElementById('edit-card-description').value = description;
   modal.classList.add('show');
 }
+
 
 // Event listener para fechar o modal de edição de card
 document.getElementById('close-edit-card-modal').addEventListener('click', () => {
@@ -234,7 +235,8 @@ document.getElementById('edit-card-form').addEventListener('submit', async (e) =
   const description = document.getElementById('edit-card-description').value;
 
   // Atualiza o conteúdo do card na interface
-  const card = document.getElementById(cardId);
+  const card = document.querySelector(`[data-card-id="${cardId}"]`);
+
   if (card) {
     card.innerHTML = `<strong>${title}</strong>${description ? `<p>${description}</p>` : ''}`;
     // Reanexa os event listeners para drag & drop e clique
