@@ -33,6 +33,8 @@ async function initializeAppData() {
   } catch (error) {
     console.error("Erro durante a inicialização:", error);
   }
+
+  loadEventsFromFirestore();
 }
 
 document.addEventListener("DOMContentLoaded", initializeAppData);
@@ -588,22 +590,6 @@ const eventTypes = {
 // Variáveis globais para o mês e ano atualmente exibidos
 let currentMonth = new Date().getMonth();
 let currentYear = new Date().getFullYear();
-
-// Inicialização do DOM
-document.addEventListener("DOMContentLoaded", async () => {
-  await loadEventsFromFirestore(); // Carrega os eventos antes de gerar o calendário
-  initializeCalendar();
-
-  // Adiciona event listeners de forma segura
-  const leftButton = document.getElementById("esquerta");
-  const rightButton = document.getElementById("direita");
-
-  leftButton.removeEventListener("click", () => changeMonth(-1));
-  rightButton.removeEventListener("click", () => changeMonth(1));
-
-  leftButton.addEventListener("click", () => changeMonth(-1));
-  rightButton.addEventListener("click", () => changeMonth(1));
-});
 
 function changeMonth(direction) {
   // Ajusta o mês atual
