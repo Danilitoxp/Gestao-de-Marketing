@@ -212,11 +212,6 @@ aside .sidebar a span {
   color: var(--color-dark-variant);
 }
 
-aside .sidebar a:last-child {
-  position: absolute;
-  bottom: -1rem;
-  width: 100%;
-}
 
 aside .sidebar a.active {
   background: var(--color-light);
